@@ -281,10 +281,7 @@ export class RestaurantService {
 				};
 			}
 
-			const dish = await this.dishes.save(
-				this.dishes.create({ ...createDishInput, restaurant })
-			);
-			console.log(dish);
+			await this.dishes.save(this.dishes.create({ ...createDishInput, restaurant }));
 
 			return { ok: true };
 		} catch {
