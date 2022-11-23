@@ -10,12 +10,12 @@ import {
 	PUB_SUB,
 } from 'src/common/common.constants';
 import { User } from 'src/users/entities/user.entity';
-import { CreateOrderInput, CreateOrderOutput } from './dto/create-order.dto';
-import { EditOrderInput, EditOrderOutput } from './dto/edit-order.dto';
-import { GetOrderInput, GetOrderOutput } from './dto/get-order.dto';
-import { GetOrdersInput, GetOrdersOutput } from './dto/get-orders.dto';
-import { OrderUpdatesInput } from './dto/order-updates.dto';
-import { TakeOrderInput, TakeOrderOutput } from './dto/take-order.dto';
+import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
+import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
+import { OrderUpdatesInput } from './dtos/order-updates.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 import { Order } from './entities/order.entity';
 import { OrderService } from './orders.service';
 

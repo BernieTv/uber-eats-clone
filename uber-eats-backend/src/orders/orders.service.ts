@@ -11,11 +11,11 @@ import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateOrderInput, CreateOrderOutput } from './dto/create-order.dto';
-import { EditOrderInput, EditOrderOutput } from './dto/edit-order.dto';
-import { GetOrderInput, GetOrderOutput } from './dto/get-order.dto';
-import { GetOrdersInput, GetOrdersOutput } from './dto/get-orders.dto';
-import { TakeOrderInput, TakeOrderOutput } from './dto/take-order.dto';
+import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
+import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 import { OrderItem } from './entities/order-item.entity';
 import { Order, OrderStatus } from './entities/order.entity';
 
