@@ -3,12 +3,19 @@ import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { PUB_SUB } from 'src/common/common.constants';
+import {
+	NEW_COOKED_ORDER,
+	NEW_ORDER_UPDATE,
+	NEW_PENDING_ORDER,
+	PUB_SUB,
+} from 'src/common/common.constants';
 import { User } from 'src/users/entities/user.entity';
 import { CreateOrderInput, CreateOrderOutput } from './dto/create-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dto/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dto/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dto/get-orders.dto';
+import { OrderUpdatesInput } from './dto/order-updates.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dto/take-order.dto';
 import { Order } from './entities/order.entity';
 import { OrderService } from './orders.service';
 
@@ -55,16 +62,52 @@ export class OrderResolver {
 		return this.orderService.editOrder(user, editOrderInput);
 	}
 
-	@Mutation(() => Boolean)
-	potatoReady() {
-		this.pubSub.publish('orderSubscription', { orderSubscription: 'Ready' });
-		return true;
+	@Subscription(() => Order, {
+		filter: ({ pendingOrders: { ownerId } }, _, { user }) => {
+			return ownerId === user.id;
+		},
+		resolve: ({ pendingOrders: { order } }) => order,
+	})
+	@Role(['Owner'])
+	pendingOrders() {
+		return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
 	}
 
-	@Subscription(() => String)
+	@Subscription(() => Order)
+	@Role(['Delivery'])
+	cookedOrders() {
+		return this.pubSub.asyncIterator(NEW_COOKED_ORDER);
+	}
+
+	@Subscription(() => Order, {
+		filter: (
+			{ orderUpdates: order }: { orderUpdates: Order },
+			{ input }: { input: OrderUpdatesInput },
+			{ user }: { user: User }
+		) => {
+			if (
+				order.driverId !== user.id &&
+				order.customerId !== user.id &&
+				order.restaurant.ownerId !== user.id
+			) {
+				return false;
+			}
+
+			return order.id === input.id;
+		},
+	})
 	@Role(['Any'])
-	orderSubscription(@AuthUser() user: User) {
-		console.log(user);
-		return this.pubSub.asyncIterator('orderSubscription');
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput) {
+		return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
+	}
+
+	@Mutation(() => TakeOrderOutput)
+	@Role(['Delivery'])
+	takeOrder(
+		@AuthUser() driver: User,
+		@Args('input') takeOrderInput: TakeOrderInput
+	): Promise<TakeOrderOutput> {
+		return this.orderService.takeOrder(driver, takeOrderInput);
 	}
 }
