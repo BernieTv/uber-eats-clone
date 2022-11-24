@@ -288,7 +288,7 @@ export class OrderService {
 			return {
 				ok: true,
 			};
-		} catch (error) {
+		} catch {
 			return {
 				ok: false,
 				error: 'Could not update order',

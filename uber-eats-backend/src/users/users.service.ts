@@ -37,7 +37,7 @@ export class UsersService {
 			);
 			this.mailService.sendVerificationEmail(user.email, verification.code);
 			return { ok: true };
-		} catch (error) {
+		} catch {
 			return { ok: false, error: "Couldn't create account" };
 		}
 	}
@@ -66,7 +66,7 @@ export class UsersService {
 				ok: true,
 				token,
 			};
-		} catch (error) {
+		} catch {
 			return { ok: false, error: "Can't log user in." };
 		}
 	}
@@ -78,7 +78,7 @@ export class UsersService {
 				ok: true,
 				user,
 			};
-		} catch (error) {
+		} catch {
 			return {
 				ok: false,
 				error: 'User Not Found',
@@ -108,7 +108,7 @@ export class UsersService {
 			return {
 				ok: true,
 			};
-		} catch (error) {
+		} catch {
 			return { ok: false, error: 'Could not update profile.' };
 		}
 	}
@@ -126,7 +126,7 @@ export class UsersService {
 				return { ok: true };
 			}
 			return { ok: false, error: 'Verification not found.' };
-		} catch (error) {
+		} catch {
 			return { ok: false, error: 'Could not verify email.' };
 		}
 	}
