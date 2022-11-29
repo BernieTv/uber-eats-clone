@@ -1,11 +1,16 @@
 import { gql, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import Helmet from 'react-helmet';
+import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 import { FormError } from '../components/form-error';
 import uberLogo from '../images/logo.svg';
 import { Button } from '../components/button';
+import { UserRole } from '../__generated/globalTypes';
+import {
+	createAccountMutation,
+	createAccountMutationVariables,
+} from '../__generated/createAccountMutation';
 
 const CREATE_ACCOUNT_MUTATION = gql`
 	mutation createAccountMutation($createAccountInput: CreateAccountInput!) {
@@ -19,6 +24,7 @@ const CREATE_ACCOUNT_MUTATION = gql`
 interface ICreateAccountForm {
 	email: string;
 	password: string;
+	role: UserRole;
 }
 
 const CreateAccount = () => {
@@ -26,11 +32,41 @@ const CreateAccount = () => {
 		register,
 		formState: { errors, isValid },
 		handleSubmit,
-	} = useForm<ICreateAccountForm>({ mode: 'onChange' });
+		getValues,
+	} = useForm<ICreateAccountForm>({
+		mode: 'onChange',
+		defaultValues: {
+			role: UserRole.Client,
+		},
+	});
+	const navigate = useNavigate();
 
-	const [createAccountMutation] = useMutation(CREATE_ACCOUNT_MUTATION);
+	const onCompleted = (data: createAccountMutation) => {
+		const {
+			createAccount: { ok },
+		} = data;
+		if (ok) {
+			alert('Account Created! Log in now!');
+			navigate('/');
+		}
+	};
 
-	const onSubmit = () => {};
+	const [createAccountMutation, { loading, data: createAccountMutationResult }] =
+		useMutation<createAccountMutation, createAccountMutationVariables>(
+			CREATE_ACCOUNT_MUTATION,
+			{ onCompleted }
+		);
+
+	const onSubmit = () => {
+		if (!loading) {
+			const { email, password, role } = getValues();
+			createAccountMutation({
+				variables: {
+					createAccountInput: { email, password, role },
+				},
+			});
+		}
+	};
 
 	return (
 		<div className='h-screen flex items-center flex-col mt-10 lg:mt-28'>
@@ -46,7 +82,11 @@ const CreateAccount = () => {
 					onSubmit={handleSubmit(onSubmit)}
 					className='grid gap-3 mt-5 w-full mb-5'>
 					<input
-						{...register('email', { required: 'Email is required' })}
+						{...register('email', {
+							required: 'Email is required',
+							pattern:
+								/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+						})}
 						name='email'
 						type='email'
 						placeholder='Email'
@@ -55,10 +95,12 @@ const CreateAccount = () => {
 					{errors.email?.message && (
 						<FormError errorMessage={errors.email.message} />
 					)}
+					{errors.email?.type === 'pattern' && (
+						<FormError errorMessage={'Please enter a valid email'} />
+					)}
 					<input
 						{...register('password', {
 							required: 'Password is required',
-							minLength: 3,
 						})}
 						name='password'
 						type='password'
@@ -68,10 +110,25 @@ const CreateAccount = () => {
 					{errors.password?.message && (
 						<FormError errorMessage={errors.password.message} />
 					)}
-					{errors.password?.type === 'minLength' && (
-						<FormError errorMessage='Password must be more than 3 chars.' />
+					<select
+						{...register('role', {
+							required: true,
+						})}
+						className='input'>
+						{Object.keys(UserRole).map((role) => (
+							<option key={role}>{role}</option>
+						))}
+					</select>
+					<Button
+						canClick={isValid}
+						loading={loading}
+						actionText={'Create Account'}
+					/>
+					{createAccountMutationResult?.createAccount.error && (
+						<FormError
+							errorMessage={createAccountMutationResult.createAccount.error}
+						/>
 					)}
-					<Button canClick={isValid} loading={false} actionText={'Create Account'} />
 				</form>
 				<div>
 					Already have an account?{' '}

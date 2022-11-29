@@ -1,12 +1,14 @@
 import { gql, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import Helmet from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
 import { FormError } from '../components/form-error';
 import { loginMutation, loginMutationVariables } from '../__generated/loginMutation';
 import uberLogo from '../images/logo.svg';
 import { Button } from '../components/button';
+import { authTokenVar, isLoggedInVar } from '../apollo';
+import { LOCAL_STORAGE_TOKEN } from '../constants';
 
 const LOGIN_MUTATION = gql`
 	mutation loginMutation($loginInput: LoginInput!) {
@@ -36,8 +38,10 @@ const Login = () => {
 			login: { ok, token },
 		} = data;
 
-		if (ok) {
-			console.log(token);
+		if (ok && token) {
+			localStorage.setItem(LOCAL_STORAGE_TOKEN, token);
+			authTokenVar(token);
+			isLoggedInVar(true);
 		}
 	};
 
@@ -71,7 +75,11 @@ const Login = () => {
 					onSubmit={handleSubmit(onSubmit)}
 					className='grid gap-3 mt-5 w-full mb-5'>
 					<input
-						{...register('email', { required: 'Email is required' })}
+						{...register('email', {
+							required: 'Email is required',
+							pattern:
+								/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+						})}
 						name='email'
 						type='email'
 						placeholder='Email'
@@ -80,10 +88,12 @@ const Login = () => {
 					{errors.email?.message && (
 						<FormError errorMessage={errors.email.message} />
 					)}
+					{errors.email?.type === 'pattern' && (
+						<FormError errorMessage={'Please enter a valid email'} />
+					)}
 					<input
 						{...register('password', {
 							required: 'Password is required',
-							minLength: 3,
 						})}
 						name='password'
 						type='password'
@@ -92,9 +102,6 @@ const Login = () => {
 					/>
 					{errors.password?.message && (
 						<FormError errorMessage={errors.password.message} />
-					)}
-					{errors.password?.type === 'minLength' && (
-						<FormError errorMessage='Password must be more than 3 chars.' />
 					)}
 					<Button canClick={isValid} loading={loading} actionText={'Log In'} />
 					{loginMutationResult?.login.error && (
