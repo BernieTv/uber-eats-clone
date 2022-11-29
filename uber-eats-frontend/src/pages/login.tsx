@@ -2,10 +2,11 @@ import { gql, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '../components/form-error';
+import { loginMutation, loginMutationVariables } from '../__generated/loginMutation';
 
 const LOGIN_MUTATION = gql`
-	mutation loginMutation($email: String!, $password: String!) {
-		login(input: { email: $email, password: $password }) {
+	mutation loginMutation($loginInput: LoginInput!) {
+		login(input: $loginInput) {
 			ok
 			error
 			token
@@ -26,16 +27,32 @@ const Login = () => {
 		handleSubmit,
 	} = useForm<ILoginForm>();
 
-	const [loginMutation] = useMutation(LOGIN_MUTATION);
+	const onCompleted = (data: loginMutation) => {
+		const {
+			login: { ok, token },
+		} = data;
+
+		if (ok) {
+			console.log(token);
+		}
+	};
+
+	const [loginMutation, { data: loginMutationResult, loading }] = useMutation<
+		loginMutation,
+		loginMutationVariables
+	>(LOGIN_MUTATION, {
+		onCompleted,
+	});
 
 	const onSubmit = () => {
-		const { email, password } = getValues();
-		loginMutation({
-			variables: {
-				email,
-				password,
-			},
-		});
+		if (!loading) {
+			const { email, password } = getValues();
+			loginMutation({
+				variables: {
+					loginInput: { email, password },
+				},
+			});
+		}
 	};
 
 	return (
@@ -56,7 +73,7 @@ const Login = () => {
 					<input
 						{...register('password', {
 							required: 'Password is required',
-							minLength: 10,
+							minLength: 3,
 						})}
 						name='password'
 						type='password'
@@ -67,9 +84,12 @@ const Login = () => {
 						<FormError errorMessage={errors.password.message} />
 					)}
 					{errors.password?.type === 'minLength' && (
-						<FormError errorMessage='Password must be more than 10 chars.' />
+						<FormError errorMessage='Password must be more than 3 chars.' />
 					)}
-					<button className='btn'>Log In</button>
+					<button className='btn'>{loading ? 'Loading...' : 'Log In'}</button>
+					{loginMutationResult?.login.error && (
+						<FormError errorMessage={loginMutationResult.login.error} />
+					)}
 				</form>
 			</div>
 		</div>
