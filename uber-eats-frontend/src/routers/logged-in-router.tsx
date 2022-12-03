@@ -1,22 +1,10 @@
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Header } from '../components/header';
 import { useMeQuery } from '../hooks/useMeQuery';
 import { NotFound } from '../pages/404';
 import { Restaurants } from '../pages/client/restaurants';
-import { meQuery } from '../__generated/meQuery';
-
-interface IRoutesByRoleProps {
-	children: JSX.Element;
-	data: meQuery;
-}
-
-const RoutesByRole = ({ children, data }: IRoutesByRoleProps) => {
-	if (data.me.role === 'Client') {
-		return children;
-	}
-
-	return <Navigate to='/login' />;
-};
+import { ConfirmEmail } from '../pages/user/confirm-email';
+import { EditProfile } from '../pages/user/edit-profile';
 
 export const LoggedInRouter = () => {
 	const { data, loading, error } = useMeQuery();
@@ -33,14 +21,13 @@ export const LoggedInRouter = () => {
 		<Router>
 			<Header />
 			<Routes>
-				<Route
-					path='/'
-					element={
-						<RoutesByRole data={data}>
-							<Restaurants />
-						</RoutesByRole>
-					}
-				/>
+				{data.me.role === 'Client' && <Route path='/' element={<Restaurants />} />}
+				{data.me.role === 'Client' && (
+					<Route path='/confirm' element={<ConfirmEmail />} />
+				)}
+				{data.me.role === 'Client' && (
+					<Route path='/edit-profile' element={<EditProfile />} />
+				)}
 				<Route path='*' element={<NotFound />} />
 			</Routes>
 		</Router>
