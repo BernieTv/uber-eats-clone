@@ -7,6 +7,8 @@ import uberLogo from '../images/logo.svg';
 export const Header = () => {
 	const { data } = useMeQuery();
 
+	if (!data) return <></>;
+
 	return (
 		<>
 			{!data?.me.verified && (

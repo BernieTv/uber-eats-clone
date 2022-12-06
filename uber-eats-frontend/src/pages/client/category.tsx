@@ -27,11 +27,9 @@ export const Category = () => {
 		slug: string;
 	};
 
-	const { data, loading } = useQuery<category, categoryVariables>(CATEGORY_QUERY, {
+	const { data } = useQuery<category, categoryVariables>(CATEGORY_QUERY, {
 		variables: { input: { page: 1, slug } },
 	});
-
-	console.log();
 
 	return (
 		<div>
