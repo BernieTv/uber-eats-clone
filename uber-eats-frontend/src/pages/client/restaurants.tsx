@@ -77,10 +77,8 @@ export const Restaurants = () => {
 				<div className='max-w-screen-2xl pb-20 mx-auto mt-8'>
 					<div className='flex justify-around max-w-screen-sm mx-auto'>
 						{data?.allCategories.categories?.map((category) => (
-							<Link to={`/category/${category.slug}`}>
-								<div
-									className='flex flex-col group items-center justify-center cursor-pointer'
-									key={category.id}>
+							<Link to={`/category/${category.slug}`} key={category.id}>
+								<div className='flex flex-col group items-center justify-center cursor-pointer'>
 									<div
 										className='w-16 h-16 bg-cover rounded-full group-hover:bg-gray-100'
 										style={{

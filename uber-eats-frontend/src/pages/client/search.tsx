@@ -27,7 +27,7 @@ export const Search = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const navigateRef = useRef(navigate);
-	const [callQuery, { loading, data, called }] = useLazyQuery<
+	const [callQuery, { data }] = useLazyQuery<
 		searchRestaurant,
 		searchRestaurantVariables
 	>(SEARCH_RESTAURANT);
@@ -44,12 +44,19 @@ export const Search = () => {
 		});
 	}, [location.search, callQuery]);
 
+	console.log(data);
+
 	return (
 		<div>
 			<Helmet>
 				<title>Search | Uber Eats</title>
 			</Helmet>
 			<h1>Search Page</h1>
+			<div>
+				{data?.searchRestaurant?.restaurants?.map((restaurant) => (
+					<h2 key={restaurant.id}>{restaurant.name}</h2>
+				))}
+			</div>
 		</div>
 	);
 };

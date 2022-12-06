@@ -3,6 +3,7 @@ import { Header } from '../components/header';
 import { useMeQuery } from '../hooks/useMeQuery';
 import { NotFound } from '../pages/404';
 import { Category } from '../pages/client/category';
+import { RestaurantPage } from '../pages/client/restaurant';
 import { Restaurants } from '../pages/client/restaurants';
 import { Search } from '../pages/client/search';
 import { ConfirmEmail } from '../pages/user/confirm-email';
@@ -33,6 +34,9 @@ export const LoggedInRouter = () => {
 				{data.me.role === 'Client' && <Route path='/search' element={<Search />} />}
 				{data.me.role === 'Client' && (
 					<Route path='/category/:slug' element={<Category />} />
+				)}
+				{data.me.role === 'Client' && (
+					<Route path='/restaurant/:id' element={<RestaurantPage />} />
 				)}
 				<Route path='*' element={<NotFound />} />
 			</Routes>
